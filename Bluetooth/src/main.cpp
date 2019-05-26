@@ -1,7 +1,9 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include "motor.h"
 #include "BluetoothSerial.h"
-
+#include <algorithm>
+#include <string>
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -13,6 +15,12 @@
 BluetoothSerial SerialBT;
 boolean isConnected;
 Motor motor;
+
+//string buffer for the bluetooth serial connection
+String lineBuffer;
+
+//Json
+StaticJsonBuffer<200> jsonBuffer;
 
 void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
   //Serial.println("event" + event);
@@ -29,10 +37,10 @@ void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
   }
 }
 
-String lineBuffer;
+
 String ReadLine(){
   boolean hasEndOfLine = false;   
-  while(SerialBT.available() > 0){
+  while(SerialBT.available() > 0 && !hasEndOfLine){
     char receivedChar = SerialBT.read();
     Serial.println("reading");
     Serial.print("received a char: "); Serial.println(receivedChar);
@@ -54,6 +62,23 @@ String ReadLine(){
   return "";
 }
 
+void handleBTInput(String json){
+  int last = json.length() - 1;
+  char lastChar = json[last];
+  if(lastChar == '\n') Serial.println("last is linebreak");
+  //str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+  JsonObject& command = jsonBuffer.parseObject(json);
+  if(command.success()){
+    Serial.println("read command");
+    float motorSpeed = command["motor"]["speed"];
+    Serial.println(motorSpeed);
+    motor.setPercentage(motorSpeed);
+  }else{    
+    Serial.print("unable to parse"); Serial.println(json);    
+  }
+  jsonBuffer.clear();
+}
+
 /// SETUP
 void setup() {
   
@@ -67,30 +92,19 @@ void setup() {
   pinMode(LED,OUTPUT);
 
   motor.setup();
-  motor.setPercentage(0.75f);
+  motor.stop();
 }
-
-
 
 void loop() {
 
-  String btCommand = ReadLine();
-  if(btCommand != ""){
-     Serial.print("BTCommand received "); Serial.println(btCommand);       
-  }
-  
   motor.loop();
 
-  /*
-  motor.foreward();
-  delay(3000);
-  motor.stop();
-  delay(1000);
-  motor.backward();
-  delay(3000);
-  motor.stop();
-  delay(1000);
-*/
+  String btCommand = ReadLine();
+  if(btCommand != ""){
+    Serial.print("BTCommand received "); Serial.println(btCommand);     
+    handleBTInput(btCommand);
+  }
+  
 
   /*
   if (Serial.available()) {
@@ -102,6 +116,8 @@ void loop() {
   */
   //
 }
+
+
 
 void motorTest() {
     delay(3000);
