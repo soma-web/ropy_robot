@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "motor.h"
 #include "BluetoothSerial.h"
 
 
@@ -11,6 +12,7 @@
 
 BluetoothSerial SerialBT;
 boolean isConnected;
+Motor motor;
 
 void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
   //Serial.println("event" + event);
@@ -52,7 +54,9 @@ String ReadLine(){
   return "";
 }
 
+/// SETUP
 void setup() {
+  
   Serial.begin(115200);
   SerialBT.register_callback(callback);
   if(!SerialBT.begin(BLUETTOTHNAME)){
@@ -61,23 +65,33 @@ void setup() {
   Serial.println("The device started, now you can pair it with bluetooth! DO it!");
 
   pinMode(LED,OUTPUT);
+
+  motor.setup();
+  motor.setPercentage(0.75f);
 }
 
 
 
 void loop() {
 
-  if(!isConnected){
-    Serial.println("not connected");
-    delay(20);
-    return;
-  }
-  
   String btCommand = ReadLine();
   if(btCommand != ""){
      Serial.print("BTCommand received "); Serial.println(btCommand);       
   }
-   
+  
+  motor.loop();
+
+  /*
+  motor.foreward();
+  delay(3000);
+  motor.stop();
+  delay(1000);
+  motor.backward();
+  delay(3000);
+  motor.stop();
+  delay(1000);
+*/
+
   /*
   if (Serial.available()) {
     SerialBT.write(Serial.read());
@@ -87,6 +101,28 @@ void loop() {
   }
   */
   //
+}
+
+void motorTest() {
+    delay(3000);
+    motor.setPercentage(0.1f);
+    motor.loop();
+    
+    delay(3000);
+    motor.setPercentage(-0.25f);
+    motor.loop();
+    
+    delay(3000);
+    motor.setPercentage(0.5f);
+    motor.loop();
+
+    delay(3000);
+    motor.setPercentage(-0.75f);
+    motor.loop();
+
+    delay(3000);
+    motor.setPercentage(1.75f);
+    motor.loop();
 }
 
 
