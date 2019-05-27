@@ -44,4 +44,10 @@
         android:layout_below="@+id/tvValue"
         android:text="STOP" />
 
+    <wificonnect.soma.de.wificonnect.ThrottleView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"/>
+
 </RelativeLayout>
