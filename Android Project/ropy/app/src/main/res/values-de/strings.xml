@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Ropy</string>
+    <string name="action_settings">Settings</string>
+    <string name="status_unconnected">Bitte verbinde dich mit einem Gerät</string>
+
+    <string name="status_connecting">Verbinde...</string>
+    <string name="status_connected">Verbunden mit %1$s</string>
+    <string name="status_connect_fail">Verbindung fehlgeschlagen</string>
+    <string name="sending_value">Geschwindigkeit auf %1$s</string>
+    <string name="stop">Stop</string>
+    <string name="no_bluetooth">Bluetooth ist nicht an</string>
+    <string name="connect">VERBINDEN</string>
+    <string name="sto">STOP</string>
+
+
+</resources>
